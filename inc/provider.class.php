@@ -821,19 +821,19 @@ class PluginSinglesignonProvider extends CommonDBTM {
 
    public function getAuthorizeUrl() {
       $type = $this->getClientType();
-
+  
       $value = static::getDefault($type, "url_authorize");
-
+  
       $fields = $this->fields;
 
-      if (!isset($fields['url_authorize']) || empty($fields['url_authorize'])) {
-         $fields['url_authorize'] = $value;
+      if (isset($fields['url_authorize']) && is_string($fields['url_authorize'])) {
+          $fields['url_authorize'] = $value;
       }
-
+  
       $fields = Plugin::doHookFunction("sso:url_authorize", $fields);
-
+  
       return $fields['url_authorize'];
-   }
+  }
 
    public function getAccessTokenUrl() {
       $type = $this->getClientType();
