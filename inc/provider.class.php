@@ -851,27 +851,31 @@ class PluginSinglesignonProvider extends CommonDBTM {
       return $fields['url_access_token'];
    }
 
-   public function getResourceOwnerDetailsUrl($access_token = null) {
-      $type = $this->getClientType();
+public function getResourceOwnerDetailsUrl($access_token = null) {
+    $type = $this->getClientType();
 
-      $value = static::getDefault($type, "url_resource_owner_details", "");
+    $value = static::getDefault($type, "url_resource_owner_details", "");
 
-      $fields = $this->fields;
-      $fields['access_token'] = $access_token;
+    $fields = $this->fields;
+    $fields['access_token'] = $access_token;
 
-      if (!isset($fields['url_resource_owner_details']) || empty($fields['url_resource_owner_details'])) {
-         $fields['url_resource_owner_details'] = $value;
-      }
+    if (!isset($fields['url_resource_owner_details']) || empty($fields['url_resource_owner_details'])) {
+        $fields['url_resource_owner_details'] = $value;
+    }
 
-      $fields = Plugin::doHookFunction("sso:url_resource_owner_details", $fields);
+    $fields = Plugin::doHookFunction("sso:url_resource_owner_details", $fields);
 
-      $url = $fields['url_resource_owner_details'];
+    $url = $fields['url_resource_owner_details'];
 
-      $url = str_replace("<access_token>", $access_token, $url);
-      $url = str_replace("<appsecret_proof>", hash_hmac('sha256', $access_token, $this->getClientSecret()), $url);
+    if ($access_token !== null) {
+        $url = str_replace("<access_token>", $access_token, $url);
 
-      return $url;
-   }
+        $access_token_for_hmac = $access_token ?: '';
+        $url = str_replace("<appsecret_proof>", hash_hmac('sha256', $access_token_for_hmac, $this->getClientSecret()), $url);
+    }
+
+    return $url;
+}
 
    /**
     * Get current URL without query string
